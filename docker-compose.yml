@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # Backend Node.js con Express
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: revit-extractor-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - APS_CLIENT_ID=${APS_CLIENT_ID}
+      - APS_CLIENT_SECRET=${APS_CLIENT_SECRET}
+      - CALLBACK_URL=${CALLBACK_URL:-http://localhost:3000/callback}
+      - PORT=3000
+      - SESSION_SECRET=${SESSION_SECRET:-dev-secret-key}
+      - DEMO_URN_BASE64=${DEMO_URN_BASE64:-}
+      - DEMO_MODEL_LABEL=${DEMO_MODEL_LABEL:-}
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - revit-network
+    depends_on:
+      - frontend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend React
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: revit-extractor-frontend
+    ports:
+      - "3001:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:3000/api
+      - REACT_APP_ENV=development
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - revit-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  revit-network:
+    driver: bridge
+
+# Volúmenes compartidos si necesitas persistencia
+volumes:
+  backend-logs:
+  frontend-dist:
