@@ -1,298 +1,232 @@
-# 📐 ARQFI APS Data Extractor
+# ARQFI APS Revit Data Extractor
 
-> Aplicación web profesional para extraer datos, propiedades y metadatos de modelos RVT y NWC usando **Autodesk Platform Services (APS)**
+Aplicación web para explorar Autodesk Docs/ACC y OSS, traducir modelos RVT/NWC con APS Model Derivative y consultar propiedades/metadata con una UX orientada a extracción técnica.
 
-![Node.js](https://img.shields.io/badge/Node.js-16+-green)
-![React](https://img.shields.io/badge/React-18+-blue)
-![License](https://img.shields.io/badge/License-MIT-brightgreen)
+## Estado actual de la app
 
-## 🎯 Características
+- OAuth 3-legged para Autodesk Docs/ACC (`/auth/login`, `/callback`).
+- Flujo OSS directo (crear/listar/eliminar bucket, subir objeto, extraer por URN OSS).
+- Modo demo público opcional sin login (`/api/demo/extract`) con límites y CAPTCHA.
+- Extracción inteligente: manifest listo, traducción en curso, o encolado de job (`svf2` con fallback a `svf`).
+- Panel de propiedades y analítica en frontend (categorías, tipos, métricas agregadas).
+- Docker para entorno local y para despliegue tipo producción con `nginx`.
 
-- ✅ **Autenticación OAuth 2.0** con Autodesk
-- ✅ **Navegación jerárquica** de Hubs → Proyectos → Archivos
-- ✅ **Extracción de datos** de modelos RVT y NWC
-- ✅ **Metadatos del modelo** y propiedades de elementos
-- ✅ **Interfaz web intuitiva** y responsiva
-- ✅ **Backend seguro** con gestión de tokens
-- ✅ **Fácil despliegue** en Heroku, AWS, Azure, etc.
+## Arquitectura
 
----
-
-## 📁 Estructura del proyecto
-
+```text
+frontend (React, puerto 3001 dev)
+   |
+   |  REST + cookie de sesión
+   v
+backend (Express, puerto 3000)
+   |
+   +--> APS Authentication (3-legged + 2-legged)
+   +--> APS Data Management (hubs/proyectos/contenidos)
+   +--> APS OSS (buckets/objetos/signed S3 upload)
+   +--> APS Model Derivative (manifest, job, metadata, properties, tree)
 ```
-revit-data-extractor/
+
+## Estructura del proyecto
+
+```text
+aps-revit-data-extractor/
 ├── backend/
-│   ├── server.js              # Servidor Express principal
-│   ├── package.json           # Dependencias backend
-│   ├── env.example            # Variables de entorno (plantilla)
-│   └── .env                   # 🔐 PRIVADO - no subir a GitHub
-│
+│   ├── server.js
+│   ├── demoProtection.js
+│   ├── data/demo-usage.json
+│   ├── env.example
+│   └── package.json
 ├── frontend/
-│   ├── src/
-│   │   ├── App.jsx            # Componente principal
-│   │   ├── App.css            # Estilos
-│   │   └── index.js
-│   ├── public/
-│   │   └── index.html
-│   ├── package.json           # Dependencias frontend
-│   ├── .env.example           # Variables de entorno (plantilla)
-│   └── .env                   # 🔐 PRIVADO - no subir a GitHub
-│
-├── .gitignore                 # ✅ Evita subir .env
-├── README.md                  # Este archivo
-├── SETUP.md                   # Guía de instalación
-└── docker-compose.yml         # Para desarrollo con Docker (opcional)
+│   ├── src/App.jsx
+│   ├── src/App.css
+│   ├── public/oauth-redirect.html
+│   ├── public/oauth-popup-close.html
+│   ├── env.example
+│   └── package.json
+├── docker-compose.yml
+├── docker-compose.prod.yml
+├── nginx.conf
+└── README.md
 ```
 
----
+## Requisitos
 
-## 🚀 Quick Start (5 minutos)
+- Node.js 18+ recomendado
+- npm 9+ recomendado
+- Cuenta APS con app registrada
+- Docker Desktop (opcional)
 
-### 1. Clonar el repositorio
+## Configuración de APS
+
+1. Crea una app en [APS](https://aps.autodesk.com/).
+2. Copia `Client ID` y `Client Secret`.
+3. Configura callback:
+   - `http://localhost:3000/callback` (local)
+
+## Variables de entorno
+
+### Backend (`backend/.env`)
+
+Crear desde plantilla:
 
 ```bash
-git clone https://github.com/tu_usuario/revit-data-extractor.git
-cd revit-data-extractor
+cp backend/env.example backend/.env
 ```
 
-### 2. Backend Setup
+Variables clave:
+
+- `APS_CLIENT_ID`, `APS_CLIENT_SECRET`
+- `CALLBACK_URL` (default local: `http://localhost:3000/callback`)
+- `FRONTEND_URL` (default local: `http://localhost:3001`)
+- `SESSION_SECRET`
+- `DEMO_URN_BASE64` (opcional, habilita modo demo)
+- `DEMO_CAPTCHA_*` (opcional, endurecimiento demo)
+
+### Frontend (`frontend/.env`)
+
+Crear desde plantilla:
+
+```bash
+cp frontend/env.example frontend/.env
+```
+
+Variables clave:
+
+- `REACT_APP_BACKEND_ORIGIN=http://localhost:3000`
+- `REACT_APP_API_URL=http://localhost:3000/api`
+- `REACT_APP_DEMO_CAPTCHA_SITE_KEY=` (si aplica)
+
+## Ejecución local (sin Docker)
+
+Terminal 1:
 
 ```bash
 cd backend
-
-# Copiar plantilla de variables
-cp env.example .env
-
-# Editar .env con tus credenciales APS
-nano .env
-
-# Instalar dependencias
 npm install
-
-# Iniciar servidor
 npm run dev
-# Servidor en http://localhost:3000
 ```
 
-### 3. Frontend Setup (nueva terminal)
+Terminal 2:
 
 ```bash
 cd frontend
-
-# Copiar plantilla
-cp .env.example .env
-
-# Instalar dependencias
 npm install
-
-# Iniciar interfaz (puerto 3001 definido en package.json)
 npm start
-# App en http://localhost:3001 — API en http://localhost:3000 (REACT_APP_* en .env)
 ```
 
-### 4. Autenticarse
+URLs:
 
-1. Abre http://localhost:3001
-2. Haz clic en **"Iniciar sesión con Autodesk"**
-3. Autoriza el acceso a tus proyectos
-4. ¡Navega y extrae datos!
+- Frontend: `http://localhost:3001`
+- Backend: `http://localhost:3000`
+- Health: `http://localhost:3000/health`
 
----
+## Ejecución con Docker
 
-## 🔑 Obtener credenciales APS
-
-### Paso 1: Registrar tu app
-
-1. Ve a **[aps.autodesk.com](https://aps.autodesk.com)**
-2. Inicia sesión con tu cuenta Autodesk (o crea una)
-3. Ve a **"My Apps"** → **"Create New App"**
-4. Rellena:
-   - **App Name**: "ARQFI APS Data Extractor"
-   - **Description**: "Extrae datos de modelos RVT y NWC"
-
-### Paso 2: Copiar credenciales
-
-Después de crear la app, verás:
-
-- **Client ID** ← Cópialo
-- **Client Secret** ← Cópialo (se muestra una sola vez)
-
-### Paso 3: Agregar callback URL
-
-En la configuración de tu app, añade:
-
-```
-http://localhost:3000/callback
-```
-
----
-
-## 🔐 Gestión de secrets
-
-### Variables sensibles (.env)
-
-**Nunca** compartas `.env` públicamente. El archivo `.gitignore` evita que se suba a GitHub automáticamente.
-
-**Archivos `.env.example`** sí se suben para mostrar estructura:
-
-```env
-# backend/env.example — convención local: API :3000, CRA :3001
-APS_CLIENT_ID=your_client_id_here
-APS_CLIENT_SECRET=your_client_secret_here
-CALLBACK_URL=http://localhost:3000/callback
-PORT=3000
-FRONTEND_URL=http://localhost:3001
-```
-
-### En producción
-
-Para desplegar a producción, configura variables de entorno en:
-
-- **Heroku**: Panel → Settings → Config Vars
-- **AWS/Azure**: App Configuration → Application Settings
-- **GitHub Actions**: Repo → Settings → Secrets and variables
+### Desarrollo
 
 ```bash
-# Ejemplo Heroku
-heroku config:set APS_CLIENT_ID=your_value
-heroku config:set APS_CLIENT_SECRET=your_value
+docker compose up --build
 ```
 
----
+### Perfil producción local
 
-## 📚 API Endpoints
-
-### Autenticación
-
-```
-GET  /auth/login           Inicia sesión OAuth
-GET  /callback             Callback de Autodesk
-GET  /logout               Cierra sesión
+```bash
+docker compose -f docker-compose.prod.yml up --build
 ```
 
-### Usuario
+Notas:
 
-```
-GET  /api/user-profile     Perfil del usuario autenticado
-GET  /api/status           Estado de autenticación
-```
+- `docker-compose.prod.yml` levanta `backend`, `frontend` y `nginx`.
+- Revisa `nginx.conf` y certificados en `./ssl` si habilitas TLS local.
 
-### Data Management
+## Flujos funcionales soportados
 
-```
-GET  /api/hubs                              Listar hubs
-GET  /api/hubs/:hubId/projects              Proyectos de un hub
-GET  /api/projects/:projectId/contents      Archivos/carpetas de un proyecto
-```
+### 1) Autodesk Docs/ACC (autenticado)
+
+1. Login OAuth.
+2. Navega `Hubs -> Projects -> Contents`.
+3. Selecciona item RVT/NWC.
+4. Ejecuta extracción (`/api/docs/extract`).
+
+### 2) OSS de la aplicación (autenticado)
+
+1. Crea o elige bucket.
+2. Sube archivo RVT/NWC (`/api/oss/buckets/:bucketKey/upload`).
+3. Ejecuta extracción (`/api/oss/extract`).
+
+### 3) Demo pública (sin login, opcional)
+
+1. Configura `DEMO_URN_BASE64`.
+2. Activa opcionalmente CAPTCHA/rate limit.
+3. Consumir extracción demo (`/api/demo/extract`).
+
+## API principal
+
+### Autenticación y estado
+
+- `GET /auth/login`
+- `GET /callback`
+- `GET /logout`
+- `GET /api/status`
+- `GET /api/user-profile`
+
+### Data Management (Docs/ACC)
+
+- `GET /api/hubs`
+- `GET /api/hubs/:hubId/projects`
+- `GET /api/hubs/:hubId/projects/:projectId/contents`
+- `POST /api/docs/extract`
+
+### OSS
+
+- `POST /api/oss/buckets`
+- `GET /api/oss/buckets`
+- `DELETE /api/oss/buckets/:bucketKey`
+- `GET /api/oss/buckets/:bucketKey/objects`
+- `DELETE /api/oss/buckets/:bucketKey/objects?objectKey=...`
+- `POST /api/oss/buckets/:bucketKey/upload`
+- `POST /api/oss/extract`
 
 ### Model Derivative
 
-```
-POST /api/translate                         Solicitar traducción del modelo
-GET  /api/metadata/:urnBase64              Metadatos del modelo
-GET  /api/properties/:urnBase64/:guid      Propiedades de un elemento
-```
+- `POST /api/translate`
+- `GET /api/metadata/:urnBase64`
+- `GET /api/properties/:urnBase64/:guid`
+- `GET /api/tree/:urnBase64/:guid`
 
----
+### Demo
 
-## 🐳 Con Docker (opcional)
+- `POST /api/demo/extract`
 
-```bash
-docker-compose up -d
-```
+## Calidad y verificación
 
-Requiere `docker-compose.yml` configurado.
-
----
-
-## 🔧 Troubleshooting
-
-| Problema                    | Solución                                                                         |
-| --------------------------- | -------------------------------------------------------------------------------- |
-| "ENOENT: no such file .env" | `cp backend/env.example backend/.env` y `cp frontend/.env.example frontend/.env` |
-| "Client ID invalid"         | Verifica que copiaste correctamente de aps.autodesk.com                          |
-| "Callback URL mismatch"     | Asegúrate que coincide en `.env` y en aps.autodesk.com                           |
-| CORS error                  | Verifica que frontend hace peticiones a `http://localhost:3000/api`              |
-| Token expirado              | Los tokens expiran en ~1 hora, implementar refresh                               |
-
-Ver [SETUP.md](./SETUP.md) para más detalles.
-
----
-
-## 📦 Stack técnico
-
-| Aspecto             | Tecnología              |
-| ------------------- | ----------------------- |
-| **Backend**         | Node.js 16+ / Express 4 |
-| **Frontend**        | React 18 / Axios        |
-| **Autenticación**   | OAuth 2.0 / APS         |
-| **APIs**            | REST / Axios            |
-| **Estilos**         | CSS3 / Flexbox / Grid   |
-| **Gestor paquetes** | npm                     |
-
----
-
-## 🚢 Despliegue
-
-### Heroku
+Comandos útiles:
 
 ```bash
-heroku create revit-data-extractor
-heroku config:set APS_CLIENT_ID=your_id APS_CLIENT_SECRET=your_secret
-git push heroku main
+# backend
+cd backend
+node --check server.js
+node --check demoProtection.js
+
+# frontend
+cd frontend
+npm run build
 ```
 
-### AWS Elastic Beanstalk
+## Troubleshooting rápido
 
-```bash
-eb create revit-data-extractor
-eb setenv APS_CLIENT_ID=your_id APS_CLIENT_SECRET=your_secret
-eb deploy
-```
+- `Not authenticated`: sesión expirada o cookie bloqueada por navegador.
+- `Callback mismatch`: `CALLBACK_URL` no coincide con APS app config.
+- `no_properties` en Model Derivative: vista sin property DB, probar reproceso forzado.
+- Error CORS: revisar `FRONTEND_URL` (backend) y `REACT_APP_API_URL` (frontend).
+- Demo no visible: falta `DEMO_URN_BASE64` o `DEMO_PUBLIC_ENABLED=false`.
 
-### Azure App Service
+## Seguridad
 
-```bash
-az webapp create --resource-group myGroup --plan myPlan --name revit-data-extractor
-az webapp config appsettings set --name revit-data-extractor ... --settings APS_CLIENT_ID=your_id
-```
+- Nunca subir `backend/.env` ni `frontend/.env`.
+- Mantener `SESSION_SECRET` fuerte en producción.
+- Usar límites de rate/captcha para demo pública.
 
----
+## Licencia
 
-## 🤝 Contribuir
-
-1. Fork el repo
-2. Crea una rama (`git checkout -b feature/nueva-feature`)
-3. Commit cambios (`git commit -m 'Add feature'`)
-4. Push a la rama (`git push origin feature/nueva-feature`)
-5. Abre un Pull Request
-
----
-
-## 📝 Licencia
-
-MIT - Libre para uso personal y comercial
-
----
-
-## 🔗 Recursos
-
-- [Documentación APS](https://aps.autodesk.com/docs/)
-- [Data Management API](https://aps.autodesk.com/en/docs/data/v2/)
-- [Model Derivative API](https://aps.autodesk.com/en/docs/model-derivative/v2/)
-- [OAuth 2.0](https://aps.autodesk.com/en/docs/authentication/v2/)
-
----
-
-## 📞 Soporte
-
-Para issues o preguntas:
-
-1. Abre un [GitHub Issue](https://github.com/tu_usuario/revit-data-extractor/issues)
-2. Revisa [SETUP.md](./SETUP.md) para troubleshooting
-3. Contacta a tu equipo de soporte APS
-
----
-
-**Hecho con ❤️ para la comunidad de Autodesk**
+MIT.
