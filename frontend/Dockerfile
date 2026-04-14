@@ -6,8 +6,8 @@ RUN npm ci && npm cache clean --force
 COPY . .
 RUN npm run build
 
-# Stage 2: Runtime
-FROM node:18-alpine
+# Stage 2: Runtime (Production target for Coolify)
+FROM node:18-alpine AS production
 WORKDIR /app
 RUN npm install -g serve
 COPY --from=build /app/build ./build
