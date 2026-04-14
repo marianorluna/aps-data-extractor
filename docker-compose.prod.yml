@@ -14,9 +14,11 @@ services:
       - NODE_ENV=production
       - APS_CLIENT_ID=${APS_CLIENT_ID}
       - APS_CLIENT_SECRET=${APS_CLIENT_SECRET}
-      - CALLBACK_URL=${CALLBACK_URL}
+      - CALLBACK_URL=${CALLBACK_URL:-https://aps-data-api.arqfi.com/callback}
       - PORT=3000
       - SESSION_SECRET=${SESSION_SECRET}
+      - FRONTEND_URL=${FRONTEND_URL:-https://aps-data.arqfi.com}
+      - FRONTEND_URLS=${FRONTEND_URLS:-https://aps-data.arqfi.com}
     networks:
       - revit-network
     restart: always
@@ -42,7 +44,8 @@ services:
     ports:
       - "3001:3000"
     environment:
-      - REACT_APP_API_URL=${API_BASE_URL:-https://api.tu-dominio.com}
+      - REACT_APP_BACKEND_ORIGIN=${REACT_APP_BACKEND_ORIGIN:-https://aps-data-api.arqfi.com}
+      - REACT_APP_API_URL=${REACT_APP_API_URL:-https://aps-data-api.arqfi.com/api}
       - REACT_APP_ENV=production
     networks:
       - revit-network

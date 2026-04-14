@@ -78,6 +78,7 @@ Variables clave:
 - `APS_CLIENT_ID`, `APS_CLIENT_SECRET`
 - `CALLBACK_URL` (default local: `http://localhost:3000/callback`)
 - `FRONTEND_URL` (default local: `http://localhost:3001`)
+- `FRONTEND_URLS` (CORS permitido, lista separada por coma)
 - `SESSION_SECRET`
 - `DEMO_URN_BASE64` (opcional, habilita modo demo)
 - `DEMO_CAPTCHA_*` (opcional, endurecimiento demo)
@@ -219,6 +220,7 @@ npm run build
 - `Callback mismatch`: `CALLBACK_URL` no coincide con APS app config.
 - `no_properties` en Model Derivative: vista sin property DB, probar reproceso forzado.
 - Error CORS: revisar `FRONTEND_URL` (backend) y `REACT_APP_API_URL` (frontend).
+- En producción (Coolify): usa `CALLBACK_URL=https://aps-data-api.arqfi.com/callback`, `FRONTEND_URL=https://aps-data.arqfi.com`, `FRONTEND_URLS=https://aps-data.arqfi.com`, `REACT_APP_BACKEND_ORIGIN=https://aps-data-api.arqfi.com`, `REACT_APP_API_URL=https://aps-data-api.arqfi.com/api`.
 - Demo no visible: falta `DEMO_URN_BASE64` o `DEMO_PUBLIC_ENABLED=false`.
 
 ## Seguridad

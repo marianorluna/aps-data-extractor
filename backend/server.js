@@ -13,6 +13,11 @@ const CLIENT_ID = process.env.APS_CLIENT_ID;
 const CLIENT_SECRET = process.env.APS_CLIENT_SECRET;
 const CALLBACK_URL = process.env.CALLBACK_URL || 'http://localhost:3000/callback';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3001';
+const FRONTEND_URLS = String(process.env.FRONTEND_URLS || FRONTEND_URL)
+  .split(',')
+  .map((url) => url.trim())
+  .filter(Boolean);
+const FRONTEND_ORIGINS = new Set(FRONTEND_URLS);
 const BASE_URL = 'https://developer.api.autodesk.com';
 
 /** URN base64 (objeto OSS público de la app, ya traducido) para modo demo sin sesión. Opcional. */
@@ -549,14 +554,27 @@ app.get('/', (_req, res) => {
 });
 
 // Middleware: el CRA (:3001) llama a la API (:3000) con cookies de sesión (OAuth).
+app.set('trust proxy', 1);
 app.use(
   cors({
-    origin: FRONTEND_URL,
+    origin: (origin, callback) => {
+      // Permite llamadas server-to-server/healthchecks sin header Origin.
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      if (FRONTEND_ORIGINS.has(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error(`CORS bloqueado para origen: ${origin}`));
+    },
     credentials: true,
   })
 );
 app.use(express.json());
 app.use(session({
+  proxy: process.env.NODE_ENV === 'production',
   secret: process.env.SESSION_SECRET || 'dev-secret-change-in-production',
   resave: false,
   saveUninitialized: true,
