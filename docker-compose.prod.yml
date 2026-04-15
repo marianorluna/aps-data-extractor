@@ -62,28 +62,6 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # Nginx - Reverse Proxy (opcional pero recomendado)
-  nginx:
-    image: nginx:alpine
-    container_name: revit-extractor-nginx
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./ssl:/etc/nginx/ssl:ro
-    networks:
-      - revit-network
-    restart: always
-    depends_on:
-      - backend
-      - frontend
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
 networks:
   revit-network:
     driver: bridge

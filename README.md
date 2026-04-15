@@ -9,7 +9,7 @@ Aplicación web para explorar Autodesk Docs/ACC y OSS, traducir modelos RVT/NWC 
 - Modo demo público opcional sin login (`/api/demo/extract`) con límites y CAPTCHA.
 - Extracción inteligente: manifest listo, traducción en curso, o encolado de job (`svf2` con fallback a `svf`).
 - Panel de propiedades y analítica en frontend (categorías, tipos, métricas agregadas).
-- Docker para entorno local y para despliegue tipo producción con `nginx`.
+- Docker para entorno local y para despliegue tipo producción.
 
 ## Arquitectura
 
@@ -45,7 +45,6 @@ aps-revit-data-extractor/
 │   └── package.json
 ├── docker-compose.yml
 ├── docker-compose.prod.yml
-├── nginx.conf
 └── README.md
 ```
 
@@ -137,8 +136,8 @@ docker compose -f docker-compose.prod.yml up --build
 
 Notas:
 
-- `docker-compose.prod.yml` levanta `backend`, `frontend` y `nginx`.
-- Revisa `nginx.conf` y certificados en `./ssl` si habilitas TLS local.
+- `docker-compose.prod.yml` levanta `backend` y `frontend`.
+- En Coolify, publica `frontend` y `backend` como servicios separados (un dominio para cada uno).
 
 ## Flujos funcionales soportados
 
