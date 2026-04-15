@@ -5,7 +5,7 @@
 # Uso: bash pre-push-check.sh
 
 echo "╔════════════════════════════════════════════════════════════╗"
-echo "║  🔐 Pre-Push Security Check - ARQFI APS Data Extractor        ║"
+echo "║  🔐 Pre-Push Security Check - APS Data Extractor        ║"
 echo "╚════════════════════════════════════════════════════════════╝"
 echo ""
 

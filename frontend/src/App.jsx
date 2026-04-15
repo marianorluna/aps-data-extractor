@@ -2341,7 +2341,7 @@ function App() {
     return (
       <div className="app-container login-container">
         <div className="login-box">
-          <h1>📐 ARQFI APS Data Extractor</h1>
+          <h1>📐 APS Data Extractor</h1>
           <p>Extrae datos y propiedades de tus modelos RVT y NWC usando APS</p>
           <p className="login-tagline">
             Inicia sesión con Autodesk para ver tus proyectos y modelos.
@@ -2435,7 +2435,7 @@ function App() {
   return (
     <div className="app-container">
       <header className="app-header">
-        <h1>📐 ARQFI APS Data Extractor</h1>
+        <h1>📐 APS Data Extractor</h1>
         <div className="header-user-actions" ref={userMenuRef}>
           {demoMode && !authenticated ? (
             compactLayout ? (

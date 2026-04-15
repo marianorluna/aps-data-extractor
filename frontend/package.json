@@ -1,7 +1,7 @@
 {
   "name": "revit-data-extractor-frontend",
   "version": "1.0.0",
-  "description": "Frontend para ARQFI APS Data Extractor - Interface web para extraer datos con APS",
+  "description": "Frontend para APS Data Extractor - Interface web para extraer datos con APS",
   "private": true,
   "dependencies": {
     "react": "^18.2.0",

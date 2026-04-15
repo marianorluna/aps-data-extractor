@@ -832,44 +832,44 @@ app.post(
   demoProtection.requireCaptchaForDemo,
   demoProtection.guardBudget((req) => estimateDemoExtractBudget(req)),
   async (req, res) => {
-  if (!isDemoOssUrnConfigured()) {
-    return res.status(503).json({
-      error: 'Demo no configurada',
-      details:
-        'Define DEMO_URN_BASE64 (URN base64 de un objeto OSS de esta app, con derivados listos). Opcional: DEMO_MODEL_LABEL.',
-    });
-  }
-  const forceReprocess = req.body?.forceReprocess === true;
-  try {
-    const sessionTok = req.session?.accessToken || '';
-    const payload = await runDerivativeExtractFlow(DEMO_URN_BASE64, sessionTok, {
-      forceReprocess,
-    });
-    const usageDelta = {
-      mdBasic: 2,
-      dmBasic: 0,
-      mdSimpleJobs: payload.status === 'translation_started' && !forceReprocess ? 1 : 0,
-      mdComplexJobs: payload.status === 'translation_started' && forceReprocess ? 1 : 0,
-    };
-    demoProtection.addUsage(usageDelta);
-    const designUrn = safeDecodeUrnFromBase64(DEMO_URN_BASE64);
-    return res.json({
-      ...payload,
-      designUrn,
-      source: 'demo',
-      demoLabel: DEMO_MODEL_LABEL,
-    });
-  } catch (flowErr) {
-    if (flowErr.httpStatus && flowErr.responseBody) {
-      return res.status(flowErr.httpStatus).json(flowErr.responseBody);
+    if (!isDemoOssUrnConfigured()) {
+      return res.status(503).json({
+        error: 'Demo no configurada',
+        details:
+          'Define DEMO_URN_BASE64 (URN base64 de un objeto OSS de esta app, con derivados listos). Opcional: DEMO_MODEL_LABEL.',
+      });
     }
-    console.error('❌ demo/extract:', flowErr.response?.data || flowErr.message);
-    res.status(500).json({
-      error: 'Fallo al cargar la demo',
-      details: flowErr.response?.data || flowErr.message,
-    });
+    const forceReprocess = req.body?.forceReprocess === true;
+    try {
+      const sessionTok = req.session?.accessToken || '';
+      const payload = await runDerivativeExtractFlow(DEMO_URN_BASE64, sessionTok, {
+        forceReprocess,
+      });
+      const usageDelta = {
+        mdBasic: 2,
+        dmBasic: 0,
+        mdSimpleJobs: payload.status === 'translation_started' && !forceReprocess ? 1 : 0,
+        mdComplexJobs: payload.status === 'translation_started' && forceReprocess ? 1 : 0,
+      };
+      demoProtection.addUsage(usageDelta);
+      const designUrn = safeDecodeUrnFromBase64(DEMO_URN_BASE64);
+      return res.json({
+        ...payload,
+        designUrn,
+        source: 'demo',
+        demoLabel: DEMO_MODEL_LABEL,
+      });
+    } catch (flowErr) {
+      if (flowErr.httpStatus && flowErr.responseBody) {
+        return res.status(flowErr.httpStatus).json(flowErr.responseBody);
+      }
+      console.error('❌ demo/extract:', flowErr.response?.data || flowErr.message);
+      res.status(500).json({
+        error: 'Fallo al cargar la demo',
+        details: flowErr.response?.data || flowErr.message,
+      });
+    }
   }
-}
 );
 
 // ============ OSS (Object Storage Service) — 2-legged, sesión de usuario obligatoria ============
@@ -1321,7 +1321,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`
 ╔════════════════════════════════════════╗
-║  🚀 ARQFI APS Data Extractor - Backend     ║
+║  🚀 APS Data Extractor - Backend     ║
 ║  Running on port ${PORT}                    ║
 ║  📝 Login: http://localhost:${PORT}/auth/login  ║
 ║  ✅ Health: http://localhost:${PORT}/health    ║

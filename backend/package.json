@@ -1,7 +1,7 @@
 {
   "name": "revit-data-extractor-backend",
   "version": "1.0.0",
-  "description": "Backend para ARQFI APS Data Extractor - Extrae datos de modelos RVT y NWC usando APS",
+  "description": "Backend para APS Data Extractor - Extrae datos de modelos RVT y NWC usando APS",
   "main": "server.js",
   "type": "commonjs",
   "scripts": {
