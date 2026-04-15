@@ -2342,9 +2342,9 @@ function App() {
       <div className="app-container login-container">
         <div className="login-box">
           <h1>📐 APS Data Extractor</h1>
-          <p>Extrae datos y propiedades de tus modelos RVT y NWC usando APS</p>
+          <p>Extrae datos y propiedades de modelos. Soporta RVT y NWC. Usa API Model Derivative y Management de APS.</p>
           <p className="login-tagline">
-            Inicia sesión con Autodesk para ver tus proyectos y modelos.
+            Para ver tus propios proyectos y modelos, inicia sesión con Autodesk. Sino, puedes ver la Demo, para ver como funciona.
           </p>
           <p className="login-popup-hint">
             Se abrirá una ventana de Autodesk. Mantén esta página abierta; si el navegador bloquea
