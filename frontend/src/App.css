@@ -22,6 +22,7 @@ body {
   justify-content: center;
   align-items: center;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: clamp(0.9rem, 4.5vw, 2rem) clamp(1.25rem, 6vw, 3.25rem);
 }
 
 .login-box {
@@ -31,6 +32,8 @@ body {
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   text-align: center;
   max-width: 400px;
+  width: min(100%, 400px);
+  margin: 0 auto;
 }
 
 .login-box h1 {
@@ -2082,7 +2085,7 @@ details[open] .prop-object-summary::before { content: '▼'; }
   }
 
   .login-box {
-    margin: 1rem;
+    padding: clamp(1.15rem, 5.2vw, 2rem) clamp(1rem, 5.2vw, 1.75rem);
   }
 
   .content {
@@ -2141,8 +2144,106 @@ details[open] .prop-object-summary::before { content: '▼'; }
 }
 
 @media (max-width: 480px) {
+  .login-container {
+    padding: 1rem 1.15rem 1.1rem;
+  }
+
+  .login-box {
+    padding: 1rem 1rem 1.1rem;
+    border-radius: 10px;
+  }
+
+  .login-box h1 {
+    font-size: 2rem;
+    line-height: 1.15;
+    margin-bottom: 0.8rem;
+  }
+
+  .login-box > p,
+  .login-tagline,
+  .login-popup-hint,
+  .login-demo-hint,
+  .login-demo-unavailable,
+  .login-btn,
+  .login-btn-demo,
+  .login-demo-captcha-wrap {
+    width: min(100%, 16.8rem);
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .login-box > p {
+    margin-bottom: 1.15rem;
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+
+  .login-tagline {
+    font-size: 0.95rem;
+    line-height: 1.42;
+    margin-bottom: 0.75rem;
+  }
+
+  .login-popup-hint,
+  .login-demo-hint,
+  .login-demo-unavailable {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    text-align: left;
+  }
+
+  .login-btn {
+    min-height: 2.9rem;
+    padding: 0.68rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  .login-demo-sep {
+    margin: 0.8rem 0 0.55rem;
+  }
+
+  .login-demo-captcha-wrap {
+    margin-top: 0.65rem;
+  }
+
   .compact-tab {
     font-size: 0.7rem;
     padding: 0.55rem 0.25rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .login-container {
+    padding: 0.85rem 0.9rem 1rem;
+  }
+
+  .login-box {
+    padding: 0.95rem 0.85rem 1rem;
+  }
+
+  .login-box h1 {
+    font-size: 1.85rem;
+  }
+
+  .login-box > p,
+  .login-tagline,
+  .login-popup-hint,
+  .login-demo-hint,
+  .login-demo-unavailable,
+  .login-btn,
+  .login-btn-demo,
+  .login-demo-captcha-wrap {
+    width: min(100%, 15.5rem);
+  }
+
+  .login-box > p,
+  .login-tagline {
+    font-size: 0.9rem;
+  }
+
+  .login-popup-hint,
+  .login-demo-hint,
+  .login-demo-unavailable {
+    font-size: 0.77rem;
   }
 }

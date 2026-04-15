@@ -2848,8 +2848,7 @@ function App() {
                         <>
                           {demoMode && modelData?.type === 'demo' && (
                             <p className="model-source-demo">
-                              Modo demostración: modelo de ejemplo en el servidor (no es uno de tus
-                              proyectos).
+                              Modo demostración: usa este modelo RVT de ejemplo para probar cómo funciona la extracción de propiedades y métricas antes de trabajar con tus propios archivos. De esta manera, puedes consultar la información del modelo sin necesidad de tener una licencia ni abrir el archivo en Revit.
                             </p>
                           )}
                           {selectedOssObject && (
@@ -2858,39 +2857,41 @@ function App() {
                               <code>{selectedOssObject.bucketKey}</code>
                             </p>
                           )}
-                          <div className="info-grid">
-                            <div className="info-item">
-                              <span className="label">Tipo:</span>
-                              <span className="value">{modelData?.type}</span>
-                            </div>
-                            <div className="info-item">
-                              <span className="label">Creado:</span>
-                              <span className="value">
-                                {formatDateTimeEs(modelData?.created)}
-                              </span>
-                            </div>
-                            <div className="info-item">
-                              <span className="label">Modificado:</span>
-                              <span className="value">
-                                {formatDateTimeEs(modelData?.modified)}
-                              </span>
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            className="extract-btn"
-                            onClick={() => handleExtractModel(false)}
-                            disabled={
-                              extractBusy ||
-                              (demoMode
-                                ? false
-                                : selectedOssObject
-                                  ? !selectedOssObject.urnBase64
-                                  : !selectedProject || selectedFile?.type !== 'items')
-                            }
-                          >
-                            {extractBusy ? 'Extrayendo…' : 'Extraer Datos del Modelo'}
-                          </button>
+                          {!demoMode && (
+                            <>
+                              <div className="info-grid">
+                                <div className="info-item">
+                                  <span className="label">Tipo:</span>
+                                  <span className="value">{modelData?.type}</span>
+                                </div>
+                                <div className="info-item">
+                                  <span className="label">Creado:</span>
+                                  <span className="value">
+                                    {formatDateTimeEs(modelData?.created)}
+                                  </span>
+                                </div>
+                                <div className="info-item">
+                                  <span className="label">Modificado:</span>
+                                  <span className="value">
+                                    {formatDateTimeEs(modelData?.modified)}
+                                  </span>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                className="extract-btn"
+                                onClick={() => handleExtractModel(false)}
+                                disabled={
+                                  extractBusy ||
+                                  (selectedOssObject
+                                    ? !selectedOssObject.urnBase64
+                                    : !selectedProject || selectedFile?.type !== 'items')
+                                }
+                              >
+                                {extractBusy ? 'Extrayendo…' : 'Extraer Datos del Modelo'}
+                              </button>
+                            </>
+                          )}
                         </>
                       )}
                     </section>
@@ -2913,39 +2914,40 @@ function App() {
                       )}
                     {extractResult?.status === 'ready' && (
                       <div className="extract-success" role="status">
-                        {/* Barra de estado compacta */}
-                        <div className="extract-status-bar">
-                          <span className="extract-status-badge">✓ Modelo listo</span>
-                          {extractResult.graphicsView ? (
-                            <span className="extract-status-source">
-                              Vista: <strong>{extractResult.graphicsView.name || '{3D} — graphics'}</strong>
-                            </span>
-                          ) : (
-                            <span className="extract-status-warn">
-                              Vista «graphics» no encontrada automáticamente
-                            </span>
-                          )}
-                          <div className="extract-status-actions">
-                            <button
-                              type="button"
-                              className="extract-btn extract-btn-secondary extract-btn-sm"
-                              onClick={() => handleExtractModel(false)}
-                              disabled={extractBusy || propertiesBusy}
-                            >
-                              Recargar
-                            </button>
-                            {extractResult.canRetryWithForce && (
+                        {!demoMode && (
+                          <div className="extract-status-bar">
+                            <span className="extract-status-badge">✓ Modelo listo</span>
+                            {extractResult.graphicsView ? (
+                              <span className="extract-status-source">
+                                Vista: <strong>{extractResult.graphicsView.name || '{3D} — graphics'}</strong>
+                              </span>
+                            ) : (
+                              <span className="extract-status-warn">
+                                Vista «graphics» no encontrada automáticamente
+                              </span>
+                            )}
+                            <div className="extract-status-actions">
                               <button
                                 type="button"
                                 className="extract-btn extract-btn-secondary extract-btn-sm"
-                                onClick={() => handleExtractModel(true)}
+                                onClick={() => handleExtractModel(false)}
                                 disabled={extractBusy || propertiesBusy}
                               >
-                                Reprocesar forzado
+                                Recargar
                               </button>
-                            )}
+                              {extractResult.canRetryWithForce && (
+                                <button
+                                  type="button"
+                                  className="extract-btn extract-btn-secondary extract-btn-sm"
+                                  onClick={() => handleExtractModel(true)}
+                                  disabled={extractBusy || propertiesBusy}
+                                >
+                                  Reprocesar forzado
+                                </button>
+                              )}
+                            </div>
                           </div>
-                        </div>
+                        )}
 
                         {/* Cargando propiedades */}
                         {propertiesBusy && (
@@ -2954,20 +2956,22 @@ function App() {
                           </p>
                         )}
 
-                        {propertiesGuidLabel && (
+                        {!demoMode && propertiesGuidLabel && (
                           <p className="extract-hint">
                             Fuente de propiedades: <strong>{propertiesGuidLabel}</strong>
                           </p>
                         )}
 
-                        <GeometrySummaryPanel
-                          summary={geometrySummary}
-                          busy={geometrySummaryBusy}
-                          error={geometrySummaryError}
-                          sourceLabel={geometrySummarySourceLabel}
-                          onReload={() => setGeometryReloadTick((tick) => tick + 1)}
-                          reloadDisabled={extractBusy || propertiesBusy || geometrySummaryBusy}
-                        />
+                        {!demoMode && (
+                          <GeometrySummaryPanel
+                            summary={geometrySummary}
+                            busy={geometrySummaryBusy}
+                            error={geometrySummaryError}
+                            sourceLabel={geometrySummarySourceLabel}
+                            onReload={() => setGeometryReloadTick((tick) => tick + 1)}
+                            reloadDisabled={extractBusy || propertiesBusy || geometrySummaryBusy}
+                          />
+                        )}
 
                         {/* Propiedades cargadas → tabla directa */}
                         {propertiesPayload && !propertiesBusy && (
